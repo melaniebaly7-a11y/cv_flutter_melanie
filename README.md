@@ -1,17 +1,18 @@
 # cv_flutter_melanie
 ## Captures_d'écran
-
-### Connexion
-![Connexion](captures%20d'%C3%A9cran/connexion.png)
+### Rapport
+<img src="https://raw.githubusercontent.com/melaniebaly7-a11y/cv_flutter_melanie/principal/captures%20d'%C3%A9cran/connexion.png" alt="Rapport" width="350" />
 
 ### CV
-![CV](captures%20d'%C3%A9cran/CV.png)
+<img src="https://raw.githubusercontent.com/melaniebaly7-a11y/cv_flutter_melanie/principal/captures%20d'%C3%A9cran/CV.png" alt="CV" width="350" />
 
 ### Famille
-![Famille](captures%20d'%C3%A9cran/famille.png)
+<img src="https://raw.githubusercontent.com/melaniebaly7-a11y/cv_flutter_melanie/principal/captures%20d'%C3%A9cran/famille.png" alt="Famille" width="350" />
 
 ### Contact
-![Contact](captures%20d'%C3%A9cran/contact.png)
+<img src="https://raw.githubusercontent.com/melaniebaly7-a11y/cv_flutter_melanie/principal/captures%20d'%C3%A9cran/contact.png" alt="Contact" width="350" />
+
+
 
 A new Flutter project.
 
