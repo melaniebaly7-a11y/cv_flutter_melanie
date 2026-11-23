@@ -16,4 +16,4 @@
 
 ## Video de demonstration
 
-[Voir la video de demonstration sur GitHub](https://github.com/melaniebaly7-a11y/cv_flutter_melanie/issues/1#issue-6564111708)
+[Voir la video de demonstration (demo.mp4)](https://github.com/melaniebaly7-a11y/cv_flutter_melanie/blob/main/assets/demo.mp4)
