@@ -1,4 +1,4 @@
-﻿name: cv_flutter_melanie
+name: cv_flutter_melanie
 description: Application mobile CV, famille et contact.
 publish_to: 'none'
 version: 1.0.0+1
@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   url_launcher: ^6.2.5
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
