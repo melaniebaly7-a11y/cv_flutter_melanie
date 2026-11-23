@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 
 void main() {
@@ -17,23 +17,23 @@ class CvMelanieApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const LoginPage(),
     );
   }
 }
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _api = ApiService();
-  bool _isLoading = false;
+  bool _loading = false;
   String? _errorMessage;
 
   @override
@@ -43,115 +43,114 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _login() async {
     setState(() {
-      _isLoading = true;
+      _loading = true;
       _errorMessage = null;
     });
 
     try {
-      final Map<String, dynamic> result = await _api.seConnecter(
+      final result = await _api.seConnecter(
         _emailController.text.trim(),
-        _passwordController.text,
+        _passwordController.text.trim(),
       );
 
       if (!mounted) return;
 
-      final bool success = result['success'] == true || result['status'] == 'success';
-      if (success) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeHubScreen()),
+      if (result['success'] == true) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeShell()),
         );
       } else {
         setState(() {
-          _errorMessage = (result['message'] ?? 'Identifiants invalides').toString();
+          _errorMessage = result['message']?.toString() ?? 'Connexion refusee';
         });
       }
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Erreur de connexion : $e';
+        _errorMessage = 'Erreur : $e';
       });
     } finally {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _loading = false;
         });
       }
     }
   }
 
+  void _enterDirectly() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const HomeShell()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Connexion - CV Melanie')),
+      appBar: AppBar(title: const Text('Connexion - CV Melanie Balley')),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Melanie Balley',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Icon(Icons.account_circle, size: 56, color: Colors.indigo),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Bienvenue',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Mot de passe',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _loading ? null : _login,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(_loading ? 'Connexion...' : 'Se connecter'),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: _enterDirectly,
+                      child: const Text('Continuer directement vers le CV et la famille'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Connectez-vous pour acceder au CV et a la gestion familiale',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Mot de passe',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                ],
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Se connecter'),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HomeHubScreen()),
-                    );
-                  },
-                  child: const Text('Continuer directement vers le CV et la famille'),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -160,20 +159,26 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class HomeHubScreen extends StatefulWidget {
-  const HomeHubScreen({super.key});
+class HomeShell extends StatefulWidget {
+  const HomeShell({super.key});
 
   @override
-  State<HomeHubScreen> createState() => _HomeHubScreenState();
+  State<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeHubScreenState extends State<HomeHubScreen> {
-  int _currentIndex = 0;
+class _HomeShellState extends State<HomeShell> {
+  int _currentIndex = 1;
+
+  void _logout() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const CvOverviewTab(),
+      const CvProfileTab(),
       const FamilyCrudTab(),
     ];
 
@@ -183,20 +188,15 @@ class _HomeHubScreenState extends State<HomeHubScreen> {
         actions: [
           IconButton(
             tooltip: 'Deconnexion',
+            onPressed: _logout,
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            },
           ),
         ],
       ),
       body: pages[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.badge), label: 'CV'),
           NavigationDestination(icon: Icon(Icons.family_restroom), label: 'Famille'),
@@ -206,8 +206,8 @@ class _HomeHubScreenState extends State<HomeHubScreen> {
   }
 }
 
-class CvOverviewTab extends StatelessWidget {
-  const CvOverviewTab({super.key});
+class CvProfileTab extends StatelessWidget {
+  const CvProfileTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -259,103 +259,156 @@ class _FamilyCrudTabState extends State<FamilyCrudTab> {
     _membersFuture = _api.getFamilyMembers();
   }
 
-  Future<void> _refreshMembers() async {
+  Future<void> _reload() async {
+    final nextFuture = _api.getFamilyMembers();
     setState(() {
-      _membersFuture = _api.getFamilyMembers();
+      _membersFuture = nextFuture;
     });
+    await nextFuture;
   }
 
-  Future<void> _openMemberDialog({Map<String, dynamic>? existing}) async {
-    final nomCtrl = TextEditingController(text: existing?['nom']?.toString() ?? '');
-    final postnomCtrl = TextEditingController(text: existing?['postnom']?.toString() ?? '');
-    final prenomCtrl = TextEditingController(text: existing?['prenom']?.toString() ?? '');
-    final lieuCtrl = TextEditingController(
-      text: existing?['lieu_naissance']?.toString() ?? existing?['lieuNaissance']?.toString() ?? '',
-    );
-    final dateCtrl = TextEditingController(
-      text: existing?['date_naissance']?.toString() ?? existing?['dateNaissance']?.toString() ?? '',
-    );
-    final parenteCtrl = TextEditingController(text: existing?['parente']?.toString() ?? '');
+  Future<void> _openMemberForm({Map<String, dynamic>? member}) async {
+    final isEdit = member != null;
+    final nomCtrl = TextEditingController(text: member?['nom']?.toString() ?? '');
+    final postnomCtrl = TextEditingController(text: member?['postnom']?.toString() ?? '');
+    final prenomCtrl = TextEditingController(text: member?['prenom']?.toString() ?? '');
+    final lieuCtrl = TextEditingController(text: member?['lieu_naissance']?.toString() ?? '');
+    final dateCtrl = TextEditingController(text: member?['date_naissance']?.toString() ?? '');
+    final parenteCtrl = TextEditingController(text: member?['parente']?.toString() ?? '');
+    bool saving = false;
+    String? formError;
 
-    final saved = await showDialog<bool>(
+    await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(existing == null ? 'Ajouter un membre' : 'Modifier un membre'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nomCtrl, decoration: const InputDecoration(labelText: 'Nom')),
-              TextField(controller: postnomCtrl, decoration: const InputDecoration(labelText: 'Postnom')),
-              TextField(controller: prenomCtrl, decoration: const InputDecoration(labelText: 'Prenom')),
-              TextField(controller: lieuCtrl, decoration: const InputDecoration(labelText: 'Lieu de naissance')),
-              TextField(
-                controller: dateCtrl,
-                decoration: const InputDecoration(labelText: 'Date de naissance (AAAA-MM-JJ)'),
+      barrierDismissible: !saving,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            Future<void> submit() async {
+              setDialogState(() {
+                saving = true;
+                formError = null;
+              });
+
+              try {
+                if (isEdit) {
+                  final rawId = member['id'];
+                  final id = rawId is int ? rawId : int.tryParse(rawId.toString()) ?? 0;
+                  await _api.modifierMembre(
+                    id: id,
+                    nom: nomCtrl.text.trim(),
+                    postnom: postnomCtrl.text.trim(),
+                    prenom: prenomCtrl.text.trim(),
+                    lieuNaissance: lieuCtrl.text.trim(),
+                    dateNaissance: dateCtrl.text.trim(),
+                    parente: parenteCtrl.text.trim(),
+                  );
+                } else {
+                  await _api.ajouterMembre(
+                    nom: nomCtrl.text.trim(),
+                    postnom: postnomCtrl.text.trim(),
+                    prenom: prenomCtrl.text.trim(),
+                    lieuNaissance: lieuCtrl.text.trim(),
+                    dateNaissance: dateCtrl.text.trim(),
+                    parente: parenteCtrl.text.trim(),
+                  );
+                }
+
+                await _reload();
+                if (!ctx.mounted) return;
+                Navigator.of(ctx).pop();
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isEdit ? 'Membre modifie avec succes.' : 'Membre enregistre avec succes.',
+                    ),
+                  ),
+                );
+              } catch (e) {
+                setDialogState(() {
+                  saving = false;
+                  formError = e.toString();
+                });
+              }
+            }
+
+            return AlertDialog(
+              title: Text(isEdit ? 'Modifier un membre' : 'Ajouter un membre'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nomCtrl,
+                      decoration: const InputDecoration(labelText: 'Nom'),
+                    ),
+                    TextField(
+                      controller: postnomCtrl,
+                      decoration: const InputDecoration(labelText: 'Postnom'),
+                    ),
+                    TextField(
+                      controller: prenomCtrl,
+                      decoration: const InputDecoration(labelText: 'Prenom'),
+                    ),
+                    TextField(
+                      controller: lieuCtrl,
+                      decoration: const InputDecoration(labelText: 'Lieu de naissance'),
+                    ),
+                    TextField(
+                      controller: dateCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Date de naissance (AAAA-MM-JJ)',
+                        hintText: '2000-08-15',
+                      ),
+                    ),
+                    TextField(
+                      controller: parenteCtrl,
+                      decoration: const InputDecoration(labelText: 'Parente'),
+                    ),
+                    if (formError != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        formError!,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              TextField(controller: parenteCtrl, decoration: const InputDecoration(labelText: 'Parente')),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enregistrer')),
-        ],
-      ),
+              actions: [
+                TextButton(
+                  onPressed: saving ? null : () => Navigator.of(ctx).pop(),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  onPressed: saving ? null : submit,
+                  child: Text(saving ? 'Enregistrement...' : 'Enregistrer'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
-    if (saved != true || !mounted) return;
-
-    try {
-      if (existing == null) {
-        await _api.ajouterMembre(
-          nom: nomCtrl.text.trim(),
-          postnom: postnomCtrl.text.trim(),
-          prenom: prenomCtrl.text.trim(),
-          lieuNaissance: lieuCtrl.text.trim(),
-          dateNaissance: dateCtrl.text.trim(),
-          parente: parenteCtrl.text.trim(),
-        );
-      } else {
-        final rawId = existing['id'];
-        final id = rawId is int ? rawId : int.parse(rawId.toString());
-        await _api.modifierMembre(
-          id: id,
-          nom: nomCtrl.text.trim(),
-          postnom: postnomCtrl.text.trim(),
-          prenom: prenomCtrl.text.trim(),
-          lieuNaissance: lieuCtrl.text.trim(),
-          dateNaissance: dateCtrl.text.trim(),
-          parente: parenteCtrl.text.trim(),
-        );
-      }
-
-      if (!mounted) return;
-      await _refreshMembers();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(existing == null ? 'Membre ajoute' : 'Membre modifie')),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $e')),
-      );
-    }
+    nomCtrl.dispose();
+    postnomCtrl.dispose();
+    prenomCtrl.dispose();
+    lieuCtrl.dispose();
+    dateCtrl.dispose();
+    parenteCtrl.dispose();
   }
 
   Future<void> _deleteMember(Map<String, dynamic> member) async {
     final rawId = member['id'];
-    final id = rawId is int ? rawId : int.tryParse(rawId.toString());
-    if (id == null) return;
-
+    final id = rawId is int ? rawId : int.tryParse(rawId.toString()) ?? 0;
     try {
       await _api.supprimerMembre(id);
-      if (!mounted) return;
-      await _refreshMembers();
+      await _reload();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Membre supprime')),
+        const SnackBar(content: Text('Membre supprime.')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -368,30 +421,28 @@ class _FamilyCrudTabState extends State<FamilyCrudTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openMemberDialog(),
-        icon: const Icon(Icons.add),
-        label: const Text('Ajouter'),
-      ),
       body: RefreshIndicator(
-        onRefresh: _refreshMembers,
+        onRefresh: _reload,
         child: FutureBuilder<List<dynamic>>(
           future: _membersFuture,
-          builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+          builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
               return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Erreur : ${snapshot.error}'),
+                      Text(
+                        'Erreur : ${snapshot.error}',
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 12),
                       ElevatedButton(
-                        onPressed: _refreshMembers,
+                        onPressed: _reload,
                         child: const Text('Reessayer'),
                       ),
                     ],
@@ -400,28 +451,36 @@ class _FamilyCrudTabState extends State<FamilyCrudTab> {
               );
             }
 
-            final members = snapshot.data ?? [];
-            if (members.isEmpty) {
+            final items = snapshot.data ?? [];
+            if (items.isEmpty) {
               return const Center(child: Text('Aucun membre de famille trouve.'));
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: members.length,
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
               itemBuilder: (context, index) {
-                final item = Map<String, dynamic>.from(members[index] as Map);
-                final fullName = '  '.trim();
-                final parente = (item['parente'] ?? '').toString();
-                final lieu = (item['lieu_naissance'] ?? '').toString();
-                final dateN = (item['date_naissance'] ?? '').toString();
+                final item = Map<String, dynamic>.from(items[index] as Map);
+                final nomStr = (item['nom'] ?? '').toString().trim();
+                final postnomStr = (item['postnom'] ?? '').toString().trim();
+                final prenomStr = (item['prenom'] ?? '').toString().trim();
+                final fullName = [nomStr, postnomStr, prenomStr]
+                    .where((s) => s.isNotEmpty)
+                    .join(' ');
+                final parente = (item['parente'] ?? '').toString().trim();
+                final lieu = (item['lieu_naissance'] ?? '').toString().trim();
+                final dateN = (item['date_naissance'] ?? '').toString().trim();
 
                 return Card(
                   child: ListTile(
-                    title: Text(fullName.isEmpty ? 'Membre #' : fullName),
+                    title: Text(
+                      fullName.isEmpty ? 'Membre #${item['id'] ?? ''}' : fullName,
+                    ),
                     subtitle: Text(
                       [
-                        if (parente.isNotEmpty) 'Parente : ',
-                        if (lieu.isNotEmpty || dateN.isNotEmpty) ' - ',
+                        if (parente.isNotEmpty) 'Parente : $parente',
+                        if (lieu.isNotEmpty) 'Lieu : $lieu',
+                        if (dateN.isNotEmpty) 'Date : $dateN',
                       ].join(' | '),
                     ),
                     trailing: Row(
@@ -430,11 +489,11 @@ class _FamilyCrudTabState extends State<FamilyCrudTab> {
                         IconButton(
                           tooltip: 'Modifier',
                           icon: const Icon(Icons.edit),
-                          onPressed: () => _openMemberDialog(existing: item),
+                          onPressed: () => _openMemberForm(member: item),
                         ),
                         IconButton(
                           tooltip: 'Supprimer',
-                          icon: const Icon(Icons.delete),
+                          icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => _deleteMember(item),
                         ),
                       ],
@@ -445,6 +504,11 @@ class _FamilyCrudTabState extends State<FamilyCrudTab> {
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _openMemberForm(),
+        icon: const Icon(Icons.add),
+        label: const Text('Ajouter'),
       ),
     );
   }

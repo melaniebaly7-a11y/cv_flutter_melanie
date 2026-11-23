@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -48,8 +48,23 @@ class ApiService {
         'parente': parente,
       }),
     );
+
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw Exception('Erreur lors de l\'ajout (${res.statusCode})');
+      String detail = res.body;
+      try {
+        final decoded = jsonDecode(res.body);
+        if (decoded is Map<String, dynamic>) {
+          final msg = decoded['message']?.toString() ?? '';
+          final errs = decoded['errors'];
+          if (errs is Map && errs.isNotEmpty) {
+            final details = errs.values.map((v) => v.toString()).join(' | ');
+            detail = msg.isNotEmpty ? '$msg ($details)' : details;
+          } else if (msg.isNotEmpty) {
+            detail = msg;
+          }
+        }
+      } catch (_) {}
+      throw Exception('Erreur lors de l\'ajout ($res.statusCode): $detail');
     }
   }
 
@@ -75,14 +90,14 @@ class ApiService {
       }),
     );
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw Exception('Erreur lors de la modification (${res.statusCode})');
+      throw Exception('Erreur lors de la modification ($res.statusCode)');
     }
   }
 
   Future<void> supprimerMembre(int id) async {
     final res = await http.delete(Uri.parse('$baseUrl/famille-membres/$id'));
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw Exception('Erreur lors de la suppression (${res.statusCode})');
+      throw Exception('Erreur lors de la suppression ($res.statusCode)');
     }
   }
 }
