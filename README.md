@@ -1,4 +1,4 @@
-﻿# cv_flutter_melanie
+# cv_flutter_melanie
 
 ## Captures d'écran
 
@@ -16,6 +16,6 @@
 
 ## Video de demonstration
 
-[![Demonstration CV Flutter & API PHP/MySQL](https://img.youtube.com/vi/TON_ID_YOUTUBE/0.jpg)](TON_LIEN_VIDEO)
-
-Voir la video de demonstration : [TON_LIEN_VIDEO](TON_LIEN_VIDEO)
+<video src="assets/demo.mp4" controls="controls" style="max-width: 730px;">
+  Votre navigateur ne supporte pas la lecture video. <a href="assets/demo.mp4">Telecharger la demonstration</a>.
+</video>
